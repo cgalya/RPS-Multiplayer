@@ -1,3 +1,14 @@
 #playerPanel1, #playerPanel2, #resultsPanel {
 	height: 250px;
 }
+
+#chatArea {
+	height: 200px;
+	width: 100%;
+	border: 3px solid #000;
+	overflow: scroll;
+}
+
+#chatInput {
+	width: 92%;
+}
