@@ -1,63 +1,75 @@
-  var config = {
-    apiKey: "AIzaSyCvrrVjIlwK9mjdlYSGwyuc5hjfPPglhH8",
-    authDomain: "rps-multiplayer-91060.firebaseapp.com",
-    databaseURL: "https://rps-multiplayer-91060.firebaseio.com",
-    projectId: "rps-multiplayer-91060",
-    storageBucket: "",
-    messagingSenderId: "83793136624"
-  };
+$(document).ready(function() {
 
-  firebase.initializeApp(config);
+var config = {
+  apiKey: "AIzaSyCvrrVjIlwK9mjdlYSGwyuc5hjfPPglhH8",
+  authDomain: "rps-multiplayer-91060.firebaseapp.com",
+  databaseURL: "https://rps-multiplayer-91060.firebaseio.com",
+  projectId: "rps-multiplayer-91060",
+  storageBucket: "",
+  messagingSenderId: "83793136624"
+};
 
-  var database = firebase.database();
+firebase.initializeApp(config);
 
-  database.ref().remove();
+var database = firebase.database();
 
-  
-  var playerNumber;	
-  var someoneWins = $("#someoneWins");
-  var playerOneWins = 0;
-  var playerTwoWins = 0;
-  var playerOneLosses = 0;
-  var playerTwoLosses = 0;
+database.ref().remove();
 
-  $(".playerOneOptions").hide();
-  $(".playerTwoOptions").hide();
+var playerNumber;	
+var playerName;
+var someoneWins = $("#someoneWins");
+var playerOneWins = 0;
+var playerTwoWins = 0;
+var playerOneLosses = 0;
+var playerTwoLosses = 0;
 
+//start by hiding rock, paper, scissor choices
+$(".playerOneOptions").hide();
+$(".playerTwoOptions").hide();
+
+//disable name submit button until text is entered into text field
+$("#submitBtn").prop('disabled', true);
+$('#nameInput').keyup(function(){
+  $("#submitBtn").prop('disabled', this.value == "" ? true : false);     
+});
  
-	  $("#submitBtn").on("click", function(event) {
-	  	event.preventDefault();	  
-	  	setPlayer();
-  	})
-	
+ //when the name submit button is clicked, call function setPlayer
+$("#submitBtn").on("click", function(event) {
+	event.preventDefault();	  
+	setPlayer();
+});
+
 function setPlayer() {
 	database.ref().once("value", function(snapshot) {
 	var nameInput = $("#nameInput").val().trim();
-			if (snapshot.child("players/player1").exists()) {				
-				$("#nameSpot").html("Hi " + nameInput + "! You are player 2.");
-				$("#nameDiv").hide();
-				database.ref("players/player2").set({				
-						name: nameInput,
-						losses: 0,
-						wins: 0					
-				});		
-				playerNumber = 2;
-				database.ref("turn").set(1);	
-				database.ref("/players/player2").onDisconnect().remove();					
-			} else {	
-				$("#nameSpot").html("Hi " + nameInput + "! You are player 1.");	
-				$("#nameDiv").hide();		
-				database.ref("players/player1").set({					
-					name: nameInput,
-					losses: 0,
-					wins: 0					
-	  		});	
-	  		playerNumber = 1;
-	  		database.ref("/players/player1").onDisconnect().remove();
-			}
-			$("#nameInput").val("");
-			console.log(playerNumber);
-});
+		if (snapshot.child("players/player1").exists()) {				
+			$("#nameSpot").html("Hi " + nameInput + "! You are player 2.");
+			$("#nameDiv").hide();
+			database.ref("players/player2").set({				
+				name: nameInput,
+				losses: 0,
+				wins: 0					
+			});		
+			playerNumber = 2;
+			playerName = nameInput;
+			database.ref("turn").set(1);	
+			database.ref("/players/player2").onDisconnect().remove();					
+		} else {	
+			$("#nameSpot").html("Hi " + nameInput + "! You are player 1.");	
+			$("#nameDiv").hide();		
+			database.ref("players/player1").set({					
+				name: nameInput,
+				losses: 0,
+				wins: 0					
+  		});	
+  		playerNumber = 1;
+  		playerName = nameInput;
+  		database.ref("/players/player1").onDisconnect().remove();
+		}
+		$("#nameInput").val("");
+		console.log(playerNumber);
+		console.log(playerName);
+	});
 }
 
 database.ref("players/player2").on("value", function(snapshot) {
@@ -70,8 +82,6 @@ database.ref("players/player1").on("value", function(snapshot) {
 	$("#playerOneStats").html("Wins: " + snapshot.val().wins + " Losses: " + snapshot.val().losses)
 });
 
-
-
 database.ref().on("value", function(snapshot) {
 	var players = snapshot.val().players;
 	var playerUno = players.player1;
@@ -81,13 +91,13 @@ database.ref().on("value", function(snapshot) {
 		if (playerNumber === 1) {
 			$(".playerOneOptions").show();
 			$("#yourTurn").html("It's your turn!");
-			$("#playerOneChoice").html("");
-			$("#playerTwoChoice").html("");
+			$("#playerOneChoice").attr("src", "");
+			$("#playerTwoChoice").attr("src", "");
 			someoneWins.html("");
 		} else if (playerNumber === 2) {
 			$("#yourTurn").html("Waiting for " + playerUno.name + " to choose...");
-			$("#playerOneChoice").html("");
-			$("#playerTwoChoice").html("");
+			$("#playerOneChoice").attr("src", "");
+			$("#playerTwoChoice").attr("src", "");
 			someoneWins.html("");
 		}
 	}
@@ -95,7 +105,7 @@ database.ref().on("value", function(snapshot) {
 	if (snapshot.val().turn === 2) {
 		if (playerNumber === 1) {
 			$(".playerOneOptions").hide();
-			$("#playerOneChoice").html(playerUno.choice);
+			$("#playerOneChoice").attr("src", "assets/images/" + playerUno.choice + ".png");
 			$("#yourTurn").html("Waiting for " + playerDos.name + " to choose...");
 		} else if (playerNumber === 2){
 			$(".playerTwoOptions").show();
@@ -107,17 +117,17 @@ database.ref().on("value", function(snapshot) {
 
 		if (playerNumber === 1) {
 			someoneWins.html(snapshot.val().winner);
-			$("#playerTwoChoice").html(playerDos.choice);
+			$("#playerTwoChoice").attr("src", "assets/images/" + playerDos.choice + ".png");
 			$("#yourTurn").html("");
 		} else if (playerNumber === 2) {
-			$("#playerOneChoice").html(playerUno.choice);
+			$("#playerOneChoice").attr("src", "assets/images/" + playerUno.choice + ".png");
 			someoneWins.html(snapshot.val().winner);
-			$("#playerTwoChoice").html(playerDos.choice);
+			$("#playerTwoChoice").attr("src", "assets/images/" + playerDos.choice + ".png");
 			$(".playerTwoOptions").hide();
 			$("#yourTurn").html("");
 		}
 	}
-})
+});
 
 $("#playerOneRock").on("click", function(event) {
 	database.ref("players/player1/choice").set("rock");
@@ -165,7 +175,7 @@ function compare() {
 			database.ref("winner").set(playerDos.name + " wins!");
 			setTimeout(function() {
           database.ref("turn").set(1);
-          },3000);    
+          },5000);    
 		} else if (playerUno.choice === "rock" && playerDos.choice === "scissors") {
 			playerOneWins++;
 			playerTwoLosses++;
@@ -174,7 +184,7 @@ function compare() {
 			database.ref("winner").set(playerUno.name + " wins!");
 			setTimeout(function() {
           database.ref("turn").set(1);
-          },3000); 
+          },5000); 
 		} else if (playerUno.choice === "paper" && playerDos.choice === "rock") {
 			playerOneWins++;
 			playerTwoLosses++;
@@ -183,7 +193,7 @@ function compare() {
 			database.ref("winner").set(playerUno.name + " wins!");
 			setTimeout(function() {
           database.ref("turn").set(1);
-          },3000); 
+          },5000); 
 		} else if (playerUno.choice === "paper" && playerDos.choice === "scissors") {
 			playerTwoWins++;
 			playerOneLosses++;
@@ -192,7 +202,7 @@ function compare() {
 			database.ref("winner").set(playerDos.name + " wins!");
 			setTimeout(function() {
           database.ref("turn").set(1);
-          },3000); 
+          },5000); 
 		} else if (playerUno.choice === "scissors" && playerDos.choice === "rock") {
 			playerTwoWins++;
 			playerOneLosses++;
@@ -201,7 +211,7 @@ function compare() {
 			database.ref("winner").set(playerDos.name + " wins!");
 			setTimeout(function() {
           database.ref("turn").set(1);
-          },3000); 
+          },5000); 
 		} else if (playerUno.choice === "scissors" && playerDos.choice === "paper") {
 			playerOneWins++;
 			playerTwoLosses++;
@@ -210,38 +220,44 @@ function compare() {
 			database.ref("winner").set(playerUno.name + " wins!");
 			setTimeout(function() {
           database.ref("turn").set(1);
-          },3000); 
+          },5000); 
 		} else if (playerUno.choice === playerDos.choice) {
 			database.ref("winner").set("it's a tie!");
 			setTimeout(function() {
           database.ref("turn").set(1);
-          },3000); 
+          },5000); 
 		}
 	})
 }
 
+database.ref("players").on("child_removed", function(snapshot) {
+	var disconnectMessage = snapshot.val().name + " has disconnected.";
+	database.ref("chat").set(disconnectMessage);
+});
+
 $("#chatSubmitBtn").on("click", function(event) {
 	event.preventDefault();
-	database.ref("chat/message").set($("#chatInput").val().trim());
-	if (playerNumber === 1) {
-		database.ref("chat/color").set("blue");
-	}
-	
-
+	// database.ref("chat/message").set($("#chatInput").val().trim());
+	// chat();
+	var message = playerName + ": " + $("#chatInput").val().trim();
+	database.ref().child("chat").set(message);
 	$("#chatInput").val("");
-})
+});
 
+database.ref("chat").on("value", function(snapshot) {
+	var chatMessage = snapshot.val();
+	var chatDiv = $("<div>" + chatMessage + "</div>");
 
-	database.ref("chat").on("value", function(snapshot) {
-		$("#chatArea").append("<div>" + snapshot.val().message + "</div>").css("color", snapshot.val().color);
-		// if (playerNumber === 1) {
-		// 	$("#chatArea").append("<div>" + snapshot.val().message + "</div>").css("color", snapshot.val().color);
-		// } else if (playerNumber === 2) {
-		// 	$("#chatArea").append("<div>" + snapshot.val() + "</div>").css("color", "yellow");
-		// }
-	})
+	if (chatMessage.startsWith(playerName)) {
+		chatDiv.addClass("colorOne");
+	} else {
+		chatDiv.addClass("colorTwo");
+	}
 
+	$("#chatArea").append(chatDiv);
+});
 
+});
 
 
 
