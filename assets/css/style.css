@@ -25,14 +25,14 @@ body {
 
 #nameInput {
 	color: #505050;
-	font-size: 17px;
+	font-size: 21px;
 	box-shadow:  0 0 1px  rgba(0,0,0,0.6);
 }
 
 #submitBtn {
 	background: #d6e280;
 	color: #888585;
-	font-size: 17px;
+	font-size: 21px;
 }
 
 #playerPanel1, #playerPanel2, #resultsPanel {
@@ -100,14 +100,3 @@ body {
 	color: #3e8870;
 }
 
-.rock {
-	background-image: url("assets/images/rock.png");
-}
-
-.paper {
-	background-image: url("assets/images/paper.png");
-}
-
-.scissors {
-	background-image: url("assets/images/scissors.png");
-}
